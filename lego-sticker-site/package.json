@@ -1,0 +1,33 @@
+{
+  "name": "lego-sticker-site",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Marketing-Testseite (Smoke-Test) für Custom-Gesichtssticker für Minifiguren",
+  "type": "module",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n web,api -c yellow,cyan \"npm:dev:web\" \"npm:dev:api\"",
+    "dev:web": "vite",
+    "dev:api": "node --watch server/index.js",
+    "build": "vite build",
+    "start": "node server/index.js",
+    "brevo:setup": "node server/brevo-setup.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@fontsource-variable/fredoka": "^5.3.0",
+    "@fontsource-variable/nunito": "^5.3.0",
+    "@getbrevo/brevo": "^6.0.3",
+    "express": "^5.2.1",
+    "lucide-vue-next": "^1.0.0",
+    "vue": "^3.5.43",
+    "vue-router": "^5.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.9",
+    "concurrently": "^10.0.5",
+    "vite": "^8.3.2"
+  }
+}
