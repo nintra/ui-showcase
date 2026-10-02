@@ -1,4 +1,5 @@
-// Turns a photo into a "sticker" look, entirely in the browser (the photo is never uploaded).
+// Turns a photo into a sticker preview, entirely in the browser (the photo is never uploaded).
+// Photo filters keep the real face and only shift colours; illustration styles redraw it.
 // All filters work on a small square canvas, so re-rendering while dragging stays fast.
 
 const INK = [29, 27, 47]
@@ -162,14 +163,91 @@ function popart(img) {
   }
 }
 
-const FILTERS = { klassik, comic, popart }
+// --- photo filters: the real face, slightly changed -------------------------
 
-/** Returns a data URL of the stylized square crop. */
-export function renderSticker(source, { style = 'klassik', zoom = 1, panX = 0, panY = 0, size = 256 } = {}) {
+function clamp255(v) {
+  return v < 0 ? 0 : v > 255 ? 255 : v
+}
+
+/** Runs fn(r, g, b, x, y) -> [r, g, b] for every pixel. */
+function eachPixel(img, fn) {
+  const { data, width } = img
+  for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+    const [r, g, b] = fn(data[i], data[i + 1], data[i + 2], p % width, Math.floor(p / width))
+    data[i] = r
+    data[i + 1] = g
+    data[i + 2] = b
+  }
+}
+
+function saturate(r, g, b, amount) {
+  const l = 0.299 * r + 0.587 * g + 0.114 * b
+  return [l + (r - l) * amount, l + (g - l) * amount, l + (b - l) * amount]
+}
+
+function contrast(v, amount) {
+  return (v - 128) * amount + 128
+}
+
+function original() {}
+
+function leuchtend(img) {
+  eachPixel(img, (r, g, b) => saturate(r, g, b, 1.4).map((v) => clamp255(contrast(v, 1.12) + 4)))
+}
+
+function warm(img) {
+  eachPixel(img, (r, g, b) => {
+    const [sr, sg, sb] = saturate(r, g, b, 1.1)
+    return [clamp255(sr * 1.06 + 10), clamp255(sg * 1.02 + 4), clamp255(sb * 0.86)]
+  })
+}
+
+function sw(img) {
+  eachPixel(img, (r, g, b) => {
+    const l = clamp255(contrast(0.299 * r + 0.587 * g + 0.114 * b, 1.25))
+    return [l, l, l]
+  })
+}
+
+function vintage(img) {
+  const half = img.width / 2
+  eachPixel(img, (r, g, b, x, y) => {
+    const sepia = [0.393 * r + 0.769 * g + 0.189 * b, 0.349 * r + 0.686 * g + 0.168 * b, 0.272 * r + 0.534 * g + 0.131 * b]
+    // Slightly faded blacks and a soft vignette.
+    const dist = Math.hypot(x - half, y - half) / half
+    const vignette = 1 - 0.35 * smoothstep(0.55, 1.1, dist)
+    return [r, g, b].map((v, c) => clamp255((18 + mix(v, sepia[c], 0.75) * 0.88) * vignette))
+  })
+}
+
+// Duotone from ink over minifigure yellow to light cream.
+const GELB_STOPS = [INK, [196, 120, 10], [255, 201, 40], [255, 228, 120]]
+function gelb(img) {
+  eachPixel(img, (r, g, b) => {
+    const t = clamp255(contrast(0.299 * r + 0.587 * g + 0.114 * b, 1.1)) / 255
+    const pos = t * (GELB_STOPS.length - 1)
+    const i = Math.min(GELB_STOPS.length - 2, Math.floor(pos))
+    const f = pos - i
+    return GELB_STOPS[i].map((v, c) => mix(v, GELB_STOPS[i + 1][c], f))
+  })
+}
+
+const FILTERS = { original, leuchtend, warm, sw, vintage, gelb, klassik, comic, popart }
+
+/**
+ * Returns a data URL of the filtered square crop. `strength` (0–1) blends the
+ * filtered result with the untouched photo.
+ */
+export function renderSticker(source, { style = 'original', strength = 1, zoom = 1, panX = 0, panY = 0, size = 256 } = {}) {
   const canvas = cropSquare(source, { zoom, panX, panY }, size)
   const ctx = canvas.getContext('2d', { willReadFrequently: true })
   const img = ctx.getImageData(0, 0, size, size)
-  ;(FILTERS[style] ?? klassik)(img)
+  const before = strength < 1 ? img.data.slice() : null
+  ;(FILTERS[style] ?? original)(img)
+  if (before) {
+    const { data } = img
+    for (let i = 0; i < data.length; i++) data[i] = mix(before[i], data[i], strength)
+  }
   ctx.putImageData(img, 0, 0)
   return canvas.toDataURL('image/png')
 }

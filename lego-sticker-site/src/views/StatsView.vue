@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { RefreshCw, LogOut } from 'lucide-vue-next'
 import BarList from '../components/stats/BarList.vue'
 import DailyColumns from '../components/stats/DailyColumns.vue'
-import { packages, occasions, priceRanges, styles } from '../../shared/site.config.js'
+import { packages, occasions, priceRanges, styles, styleGroups } from '../../shared/site.config.js'
 
 const TOKEN_KEY = 'stats-token'
 
@@ -76,6 +76,19 @@ const labelMaps = {
 
 function toItems(counts, map = {}) {
   return Object.entries(counts || {}).map(([key, value]) => ({ label: map[key] || key, value }))
+}
+
+// Real photo vs. illustration, summed over the individual styles.
+const groupOfStyle = Object.fromEntries(styles.map((s) => [s.id, styleGroups.find((g) => g.id === s.group)?.name]))
+function byLook(counts) {
+  const sums = {}
+  for (const [id, value] of Object.entries(counts || {})) {
+    const look = groupOfStyle[id] || 'k. A.'
+    sums[look] = (sums[look] || 0) + value
+  }
+  return Object.entries(sums)
+    .sort((a, b) => b[1] - a[1])
+    .map(([label, value]) => ({ label, value }))
 }
 
 const fmt = (n) => (n ?? 0).toLocaleString('de-DE')
@@ -195,7 +208,7 @@ const dailySignups = computed(() => (stats.value?.daily ?? []).map((d) => ({ dat
             <div class="card panel"><BarList title="Gewähltes Paket" :items="toItems(stats.signups.byPackage, labelMaps.package)" /></div>
             <div class="card panel"><BarList title="Preisbereitschaft (1 Gesicht, 6 Sticker)" :items="toItems(stats.signups.byPriceRange, labelMaps.price)" /></div>
             <div class="card panel"><BarList title="Anlass" :items="toItems(stats.signups.byOccasion, labelMaps.occasion)" /></div>
-            <div class="card panel"><BarList title="Stil" :items="toItems(stats.signups.byStyle, labelMaps.style)" /></div>
+            <div class="card panel"><BarList title="Look: echtes Foto oder illustriert" :items="byLook(stats.signups.byStyle)" /></div>
           </div>
 
           <h2 class="group-title">Woher kommen sie, was klicken sie?</h2>
@@ -204,7 +217,8 @@ const dailySignups = computed(() => (stats.value?.daily ?? []).map((d) => ({ dat
             <div class="card panel"><BarList title="Anmeldungen nach Quelle" :items="toItems(stats.signups.bySource)" /></div>
             <div class="card panel"><BarList title="„Vorbestellen“-Klicks nach Paket" :items="toItems(stats.pricingClicksByPackage, labelMaps.package)" /></div>
             <div class="card panel"><BarList title="CTA-Klicks nach Position" :items="toItems(stats.ctaClicksByLocation, labelMaps.location)" /></div>
-            <div class="card panel"><BarList title="Stil in der Vorschau gewählt" :items="toItems(stats.styleSelections, labelMaps.style)" /></div>
+            <div class="card panel"><BarList title="Filter / Stil bei Anmeldungen" :items="toItems(stats.signups.byStyle, labelMaps.style)" /></div>
+            <div class="card panel"><BarList title="Filter / Stil in der Vorschau angeklickt" :items="toItems(stats.styleSelections, labelMaps.style)" /></div>
             <div class="card panel"><BarList title="Geöffnete FAQ (Nr.)" :items="toItems(stats.faqOpens)" /></div>
           </div>
 

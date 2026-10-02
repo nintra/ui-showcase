@@ -26,8 +26,8 @@ function signup() {
         <p class="eyebrow"><Sparkles :size="16" aria-hidden="true" /> Bald verfügbar · {{ site.launchHint }}</p>
         <h1>Deine Minifigur. <span class="accent">Dein Gesicht.</span></h1>
         <p class="lead">
-          Wir verwandeln dein Foto in einen stilisierten Sticker, der genau auf den Kopf einer Minifigur passt. Für dich,
-          deine Familie, das Brautpaar auf der Torte oder das ganze Team.
+          Dein echtes Gesicht als Sticker, der genau auf den Kopf einer Minifigur passt – ganz natürlich, mit Foto-Filter
+          oder als Illustration. Für dich, deine Familie, das Brautpaar auf der Torte oder das ganze Team.
         </p>
         <div class="actions">
           <button type="button" class="btn" @click="signup">Kostenlos vormerken</button>

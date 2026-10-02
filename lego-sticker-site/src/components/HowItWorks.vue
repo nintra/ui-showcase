@@ -10,8 +10,8 @@ const steps = [
   },
   {
     icon: Palette,
-    title: 'Stil & Ausdruck wählen',
-    text: 'Klassik, Comic oder Pop-Art, dazu lachend, cool oder überrascht. Du siehst jeden Entwurf vorab und gibst ihn frei.',
+    title: 'Look wählen',
+    text: 'Echtes Foto – natürlich oder mit Filter wie Warm, S/W oder Vintage – oder illustriert als Klassik, Comic oder Pop-Art. Du siehst jeden Entwurf vorab und gibst ihn frei.',
     color: 'var(--blue-soft)',
   },
   {

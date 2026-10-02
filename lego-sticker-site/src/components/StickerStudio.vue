@@ -2,7 +2,7 @@
 import { ref, shallowRef, watch, computed, onBeforeUnmount } from 'vue'
 import { ImagePlus, Lock, Move, RefreshCw } from 'lucide-vue-next'
 import MiniFigure from './MiniFigure.vue'
-import { styles } from '../../shared/site.config.js'
+import { styles, styleGroups } from '../../shared/site.config.js'
 import { loadPhoto, cropSquare, renderSticker } from '../lib/stylize.js'
 import { interest, openSignup } from '../lib/interest.js'
 import { track } from '../lib/track.js'
@@ -11,6 +11,7 @@ const CROP_SIZE = 240
 
 const photo = shallowRef(null)
 const style = ref(styles[0].id)
+const strength = ref(100) // filter strength in percent
 const zoom = ref(1.2)
 const pan = ref({ x: 0, y: 0 })
 const sticker = ref('')
@@ -23,6 +24,8 @@ const cropCanvas = ref(null)
 let uploaded = false
 
 const hasPhoto = computed(() => Boolean(photo.value))
+const groups = styleGroups.map((g) => ({ ...g, styles: styles.filter((s) => s.group === g.id) }))
+const current = computed(() => styles.find((s) => s.id === style.value))
 
 async function onFile(file) {
   if (!file) return
@@ -36,6 +39,7 @@ async function onFile(file) {
     photo.value = await loadPhoto(file)
     zoom.value = 1.2
     pan.value = { x: 0, y: -0.3 } // portraits usually have the face in the upper half
+    interest.style = style.value
     if (!uploaded) {
       uploaded = true
       track('preview_upload')
@@ -82,7 +86,7 @@ function render() {
     const crop = cropSquare(source, view, CROP_SIZE * 2)
     canvas.getContext('2d').drawImage(crop, 0, 0, canvas.width, canvas.height)
   }
-  sticker.value = renderSticker(source, { ...view, style: style.value, size: 256 })
+  sticker.value = renderSticker(source, { ...view, style: style.value, strength: strength.value / 100, size: 256 })
 }
 
 function renderThumbs() {
@@ -92,7 +96,7 @@ function renderThumbs() {
   thumbs.value = Object.fromEntries(styles.map((s) => [s.id, renderSticker(source, { ...view, style: s.id })]))
 }
 
-watch([photo, zoom, pan, style], scheduleRender)
+watch([photo, zoom, pan, style, strength], scheduleRender)
 // Thumbnails only need refreshing when the crop settles, not on every drag frame.
 let thumbTimer = 0
 watch([photo, zoom, pan], () => {
@@ -197,22 +201,30 @@ function reserve() {
           <input v-model.number="zoom" type="range" min="1" max="3" step="0.01" />
         </label>
 
-        <h3>2. Stil wählen</h3>
-        <div class="styles" role="radiogroup" aria-label="Sticker-Stil">
-          <button
-            v-for="s in styles"
-            :key="s.id"
-            type="button"
-            role="radio"
-            class="style-option"
-            :aria-checked="style === s.id"
-            @click="chooseStyle(s.id)"
-          >
-            <img v-if="thumbs[s.id]" :src="thumbs[s.id]" alt="" width="64" height="64" />
-            <span class="style-name">{{ s.name }}</span>
-          </button>
+        <h3>2. Look wählen</h3>
+        <div v-for="group in groups" :key="group.id" class="style-group">
+          <p :id="`style-group-${group.id}`" class="group-name">{{ group.name }}</p>
+          <div class="styles" role="radiogroup" :aria-labelledby="`style-group-${group.id}`">
+            <button
+              v-for="s in group.styles"
+              :key="s.id"
+              type="button"
+              role="radio"
+              class="style-option"
+              :aria-checked="style === s.id"
+              @click="chooseStyle(s.id)"
+            >
+              <img v-if="thumbs[s.id]" :src="thumbs[s.id]" alt="" width="56" height="56" />
+              <span class="style-name">{{ s.name }}</span>
+            </button>
+          </div>
         </div>
-        <p class="style-desc">{{ styles.find((s) => s.id === style)?.description }}</p>
+        <p class="style-desc">{{ current?.description }}</p>
+        <label v-if="style !== 'original'" class="strength">
+          <span>Filterstärke</span>
+          <input v-model.number="strength" type="range" min="0" max="100" step="1" />
+          <output>{{ strength }}&nbsp;%</output>
+        </label>
       </div>
 
       <p v-if="error" class="error" role="alert">{{ error }}</p>
@@ -383,6 +395,19 @@ function reserve() {
   accent-color: var(--red);
 }
 
+.style-group + .style-group {
+  margin-top: 14px;
+}
+
+.group-name {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .styles {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -406,8 +431,8 @@ function reserve() {
 }
 
 .style-option img {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 26%;
   border: 2px solid var(--ink);
 }
@@ -424,10 +449,30 @@ function reserve() {
 }
 
 .style-desc {
-  margin: 12px 0 0;
+  margin: 14px 0 0;
   color: var(--muted);
   font-size: 0.95rem;
   min-height: 3em;
+}
+
+.strength {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+.strength input {
+  flex: 1;
+  accent-color: var(--red);
+}
+
+.strength output {
+  min-width: 3.2em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
 }
 
 .error {
@@ -468,7 +513,7 @@ function reserve() {
 }
 
 .figure-wrap {
-  width: min(62%, 230px);
+  width: min(70%, 270px);
 }
 
 .sheet {

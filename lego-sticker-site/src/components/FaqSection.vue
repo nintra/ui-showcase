@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     q: 'Wie wird aus meinem Foto ein Sticker?',
-    a: 'Wir stilisieren dein Foto in deinem Wunschstil und optimieren es für die kleine Fläche, damit Gesichtszüge auch auf 1 cm gut erkennbar bleiben. Vor dem Druck bekommst du einen Entwurf zur Freigabe.',
+    a: 'Du entscheidest: als echtes Foto – natürlich oder mit Filter wie Leuchtend, Warm, S/W oder Vintage – oder als Illustration im Klassik-, Comic- oder Pop-Art-Stil. Wir optimieren das Motiv für die kleine Fläche, damit dein Gesicht auch auf 1 cm gut erkennbar bleibt. Vor dem Druck bekommst du einen Entwurf zur Freigabe.',
   },
   {
     q: 'Was passiert mit meinem Foto?',

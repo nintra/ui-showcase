@@ -16,7 +16,7 @@ import FinalCta from '../components/FinalCta.vue'
       <div class="section-head">
         <p class="eyebrow">Probier's aus</p>
         <h2>So sieht dein Sticker aus</h2>
-        <p>Lade ein Foto hoch, wähle Ausschnitt und Stil – und sieh sofort deine Minifigur. Das ist eine vereinfachte Vorschau – die echten Sticker werden feiner ausgearbeitet.</p>
+        <p>Lade ein Foto hoch, wähle Ausschnitt und Look – echtes Foto mit Filter oder illustriert – und sieh sofort deine Minifigur. Das ist eine vereinfachte Vorschau, die echten Sticker optimieren wir für den Druck.</p>
       </div>
       <StickerStudio />
     </div>

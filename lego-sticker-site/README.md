@@ -1,11 +1,13 @@
 # Kopfsache – Marketing-Testseite für Gesichtssticker für Minifiguren
 
-Landingpage für einen **Smoke-Test**: Gibt es genug Menschen, die stilisierte Gesichtssticker aus ihrem eigenen Foto für
-Minifiguren kaufen würden, *bevor* das Produkt gebaut wird?
+Landingpage für einen **Smoke-Test**: Gibt es genug Menschen, die Gesichtssticker aus ihrem eigenen Foto für
+Minifiguren kaufen würden, *bevor* das Produkt gebaut wird? Echtes Foto (natürlich oder mit Filter) oder illustriert.
 
 Besucher:innen können
 
-- mit einem eigenen Foto eine **Live-Vorschau** ausprobieren (läuft komplett im Browser, nichts wird hochgeladen),
+- mit einem eigenen Foto eine **Live-Vorschau** ausprobieren: als echtes Foto mit Filtern (Original, Leuchtend, Warm,
+  S/W, Vintage, Gelb) samt Filterstärke oder illustriert (Klassik, Comic, Pop-Art). Läuft komplett im Browser, nichts
+  wird hochgeladen,
 - in der Preistabelle auf **„Vorbestellen“** klicken (Fake-Door: Statt einer Kasse öffnet sich die Warteliste),
 - sich in die **Warteliste** eintragen, mit freiwilligen Angaben zu Paket, Anlass und Preisbereitschaft.
 
@@ -80,7 +82,7 @@ Die Auswertung unter `/stats` (geschützt mit `STATS_TOKEN`) zeigt für 7, 30, 9
 | **Bestätigte Anmeldungen** und **Anmeldequote** (pro Seitenaufruf) | Das Hauptsignal: Wie viele Besucher:innen wollen das wirklich? |
 | **Trichter:** Aufrufe → Formular begonnen → abgeschickt → bestätigt | Wo springen Leute ab? |
 | **„Vorbestellen“-Klicks nach Paket** | Welches Paket bzw. welcher Preispunkt zieht? |
-| **Preisbereitschaft, Anlass, Stil** (aus den Anmeldungen) | Für wen und zu welchem Preis bauen? |
+| **Preisbereitschaft, Anlass, Look** (aus den Anmeldungen) | Für wen, zu welchem Preis und lieber echtes Foto oder Illustration? |
 | **Quelle** (UTM bzw. verweisende Seite) | Welcher Kanal bringt Interessent:innen, nicht nur Klicks? |
 | **Vorschau genutzt**, CTA-Klicks, geöffnete FAQ | Wie stark beschäftigen sich Leute mit dem Produkt? |
 
@@ -100,7 +102,7 @@ Stile, Anlässe und Preisspannen. Frontend, E-Mails und `index.html` lesen die W
 | Datei | Inhalt |
 |---|---|
 | `src/components/` | Abschnitte der Seite (Hero, Ablauf, Vorschau, Anlässe, Preise, FAQ, Formular) |
-| `src/lib/stylize.js` | Bildfilter für die Vorschau (Klassik, Comic, Pop-Art) |
+| `src/lib/stylize.js` | Bildfilter für die Vorschau (Foto-Filter und Illustrationsstile) |
 | `src/lib/track.js` | Cookiefreies Event-Tracking |
 | `server/mails.js` | Texte der Bestätigungs-, Willkommens- und Info-Mail |
 | `server/app.js` | API-Routen |

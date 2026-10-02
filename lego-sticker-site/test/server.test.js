@@ -41,12 +41,14 @@ describe('validation', () => {
       firstName: ' Max <b> ',
       consent: true,
       package: 'familie',
+      style: 'vintage',
       occasion: 'nope',
       source: { utm_source: 'instagram', evil: 'x' },
     })
     assert.equal(data.email, 'max@example.de')
     assert.equal(data.firstName, 'Max b')
     assert.equal(data.package, 'familie')
+    assert.equal(data.style, 'vintage')
     assert.equal(data.occasion, '')
     assert.deepEqual(data.source, { utm_source: 'instagram' })
   })
